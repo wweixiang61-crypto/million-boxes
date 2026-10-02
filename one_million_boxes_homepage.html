@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ONE MILLION BOXES</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#0a0a0a;color:#f5f5f5;font-family:Inter,Arial,sans-serif}
+.wrap{max-width:1180px;margin:auto;padding:28px 20px 60px}
+nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:70px}
+.logo{font-weight:900;letter-spacing:.08em}.status{font-size:12px;color:#9d9d9d;border:1px solid #292929;padding:8px 12px;border-radius:99px}
+.hero{text-align:center;max-width:800px;margin:auto}.eyebrow{color:#a5a5a5;font-size:12px;letter-spacing:.2em;text-transform:uppercase}
+h1{font-size:clamp(48px,9vw,108px);line-height:.9;margin:18px 0;font-weight:950;letter-spacing:-.06em}
+.sub{color:#aaa;font-size:17px;line-height:1.6;max-width:620px;margin:24px auto}
+.counter{margin:35px auto 20px}.count{font-size:42px;font-weight:850;letter-spacing:-.03em}.label{color:#777;font-size:12px;text-transform:uppercase;letter-spacing:.16em}
+.progress{height:7px;background:#202020;border-radius:10px;overflow:hidden;margin-top:15px}.bar{height:100%;width:0%;background:#fff}
+.layout{display:grid;grid-template-columns:1fr 300px;gap:24px;margin-top:48px}
+.panel{border:1px solid #252525;background:#101010;border-radius:20px;padding:18px}
+.grid{aspect-ratio:1/1;display:grid;grid-template-columns:repeat(20,1fr);gap:2px;background:#080808;padding:2px;border-radius:12px;overflow:hidden}
+.box{border:0;background:#242424;cursor:pointer;transition:.12s;min-width:0}.box:hover{background:#3b3b3b}.box.selected{background:#f5f5f5}.box.revealed{background:linear-gradient(135deg,#222,#444);cursor:default}
+.box.revealed::after{content:"✓";color:#fff;font-size:9px}
+.side h2{font-size:18px;margin:0 0 20px}.price{font-size:38px;font-weight:900;margin:5px 0 20px}.muted{color:#777;font-size:13px}
+.row{display:flex;justify-content:space-between;margin:12px 0;color:#aaa}.row strong{color:#fff}
+button{width:100%;border:0;border-radius:12px;padding:15px;font-size:15px;font-weight:800;cursor:pointer;background:#fff;color:#000;margin-top:12px}
+button:disabled{opacity:.35;cursor:not-allowed}
+.note{font-size:11px;color:#666;line-height:1.5;margin-top:15px}
+.modal{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;padding:20px}.modal.show{display:flex}
+.card{width:min(420px,100%);background:#121212;border:1px solid #2b2b2b;border-radius:20px;padding:25px}.card h3{margin-top:0;font-size:25px}
+.fake{background:#1d1d1d;border:1px solid #333;padding:14px;border-radius:10px;color:#aaa;margin:15px 0}
+.close{background:#222;color:#fff}.success{text-align:center}.success .big{font-size:52px}
+footer{text-align:center;color:#555;font-size:12px;margin-top:45px}
+@media(max-width:800px){.layout{grid-template-columns:1fr}.side{order:-1}.grid{grid-template-columns:repeat(20,1fr)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav><div class="logo">1M BOXES</div><div class="status">PROTOTYPE · FAKE PAYMENT</div></nav>
+<section class="hero">
+<div class="eyebrow">A curiosity project</div>
+<h1>WHAT'S<br>BEHIND IT?</h1>
+<p class="sub">One million boxes. One dollar per box. Pick a square, unlock it, and help reveal the complete image.</p>
+<div class="counter"><div class="count"><span id="revealed">0</span> / 1,000,000</div><div class="label">boxes revealed</div><div class="progress"><div class="bar" id="bar"></div></div></div>
+</section>
+
+<div class="layout">
+<div class="panel"><div class="grid" id="grid"></div></div>
+<aside class="panel side">
+<h2>Your boxes</h2>
+<div class="price">$<span id="total">0</span> SGD</div>
+<div class="row"><span>Selected</span><strong id="selected">0</strong></div>
+<div class="row"><span>Price per box</span><strong>$1</strong></div>
+<button id="pay" disabled>Fake Pay $0</button>
+<p class="note">Prototype only. No real payment is processed. Selected boxes are simulated as revealed after checkout.</p>
+</aside>
+</div>
+<footer>Prototype concept · Replace the placeholder reveal state with your real image + server/database before launch.</footer>
+</div>
+
+<div class="modal" id="modal">
+<div class="card" id="modalCard">
+<h3>Confirm your boxes</h3>
+<div class="fake">🧪 TEST PAYMENT<br><small>No money will be charged.</small></div>
+<div class="row"><span>Boxes</span><strong id="modalBoxes">0</strong></div>
+<div class="row"><span>Total</span><strong>$<span id="modalTotal">0</span> SGD</strong></div>
+<button id="confirm">Simulate Payment</button>
+<button class="close" id="close">Cancel</button>
+</div>
+</div>
+
+<script>
+const N=400, grid=document.getElementById('grid');
+const selected=new Set(), revealed=new Set();
+for(let i=1;i<=N;i++){
+ const b=document.createElement('button'); b.className='box'; b.title='Box #'+String(i).padStart(6,'0');
+ b.onclick=()=>{if(revealed.has(i))return;if(selected.has(i)){selected.delete(i);b.classList.remove('selected')}else{selected.add(i);b.classList.add('selected')}update()};
+ grid.appendChild(b);
+}
+function update(){
+ document.getElementById('selected').textContent=selected.size;
+ document.getElementById('total').textContent=selected.size;
+ document.getElementById('pay').textContent='Fake Pay $'+selected.size;
+ document.getElementById('pay').disabled=selected.size===0;
+ document.getElementById('modalBoxes').textContent=selected.size;
+ document.getElementById('modalTotal').textContent=selected.size;
+ document.getElementById('revealed').textContent=revealed.size.toLocaleString();
+ document.getElementById('bar').style.width=(revealed.size/1000000*100)+'%';
+}
+document.getElementById('pay').onclick=()=>document.getElementById('modal').classList.add('show');
+document.getElementById('close').onclick=()=>document.getElementById('modal').classList.remove('show');
+document.getElementById('confirm').onclick=()=>{
+ for(const i of selected){revealed.add(i);grid.children[i-1].classList.remove('selected');grid.children[i-1].classList.add('revealed');}
+ selected.clear();document.getElementById('modal').classList.remove('show');update();
+ document.getElementById('modalCard').innerHTML='<div class="success"><div class="big">✓</div><h3>Boxes unlocked</h3><p class="muted">This is a fake payment. No money was charged.</p><button onclick="document.getElementById(\\'modal\\').classList.remove(\\'show\\')">Continue</button></div>';
+};
+update();
+</script>
+</body>
+</html>
